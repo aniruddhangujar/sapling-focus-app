@@ -1,0 +1,7 @@
+{
+  "name": "Sapling_1",
+  "description": "A calm, goal-based focus ritual. Grow your intentions into a digital grove through real-world discipline.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
