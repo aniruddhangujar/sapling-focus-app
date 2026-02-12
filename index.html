@@ -1,83 +1,18 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sapling</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --neon-green: #22c55e;
-            --deep-forest: #020502;
-            --moss-zinc: #081008;
-        }
-        body {
-            background-color: var(--deep-forest);
-            color: #e2e2e2;
-            font-family: 'VT323', monospace;
-            overflow-x: hidden;
-            user-select: none;
-        }
-        .crt-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(10, 20, 10, 0) 50%, rgba(0, 5, 0, 0.25) 50%), linear-gradient(90deg, rgba(20, 50, 20, 0.06), rgba(0, 255, 0, 0.02), rgba(20, 50, 20, 0.06));
-            z-index: 999;
-            background-size: 100% 4px, 3px 100%;
-            pointer-events: none;
-            opacity: 0.12;
-        }
-        .pixel-border {
-            border: 2px solid #1a2e1a;
-            box-shadow: 4px 4px 0px 0px #010301;
-        }
-        .pixel-font {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.7rem;
-            letter-spacing: 0.05em;
-        }
-        .pixel-corners {
-            clip-path: polygon(
-                0 4px, 4px 4px, 4px 0,
-                calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
-                100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
-                4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
-            );
-        }
-        .hud-grid {
-            background-image: radial-gradient(circle, #22c55e0a 1px, transparent 1px);
-            background-size: 32px 32px;
-        }
-        @keyframes flicker {
-            0% { opacity: 0.97; }
-            5% { opacity: 0.95; }
-            10% { opacity: 0.99; }
-            15% { opacity: 0.94; }
-            20% { opacity: 0.98; }
-            100% { opacity: 1; }
-        }
-        .flicker { animation: flicker 0.1s infinite; }
-        
-        /* Ani Glow Up */
-        .ani-glow {
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.15), inset 0 0 15px rgba(34, 197, 94, 0.05);
-        }
-    </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.4",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.40.0"
-  }
-}
-</script>
-</head>
-<body class="bg-[#020502]">
-    <div class="crt-overlay"></div>
+  </head>
+
+  <body class="bg-[#020502]">
     <div id="root"></div>
-</body>
+
+    <!-- THIS is what actually runs your React app -->
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
 </html>
