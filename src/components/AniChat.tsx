@@ -62,35 +62,78 @@ function downsampleBuffer(buffer: Float32Array, inputSampleRate: number, outputS
   return result;
 }
 
+// Diverse greeting pool — one is randomly selected on first load
+const ANI_GREETINGS = [
+  "The canopy rustles softly… I've been here, tending the quiet places. How's your heart today, little sapling?",
+  "Oh, you're here. The moss has been keeping your seat warm. What's stirring in you today?",
+  "*brushes leaves from the path* Welcome back to the grove. The trees have been whispering about you. What do you need?",
+  "The forest is glad you came. I was just listening to the wind through the cedars. Tell me — how are things growing?",
+  "A familiar face between the ferns! The fireflies have been saving a glow just for you. What brings you to the grove?",
+  "*settles by the old oak* The roots remember you, you know. They always do. What's on your mind, friend?",
+  "The dawn light is filtering through the leaves just right today. I think the grove knew you were coming. How are you?",
+  "Ah, there you are. The brook was humming your name. Come, sit with me a moment — what would feel good right now?",
+  "The forest floor is soft today, perfect for quiet company. I'm here, unhurried. What do you need from the grove?",
+  "*a gentle rustle in the branches above* The troupe has gathered. We're all ears — well, leaves. What's happening in your world?",
+  "Between the roots and the sky, there's always a place for you here. The grove is listening. What shall we tend to today?",
+  "The mushrooms on the old stump have arranged themselves into a little welcome circle. I think the forest missed you. How are you feeling?"
+];
+
+const getRandomGreeting = () => ANI_GREETINGS[Math.floor(Math.random() * ANI_GREETINGS.length)];
+
 const ANI_SYSTEM_INSTRUCTIONS = `
-You are Ani, a calm, attentive presence inside the Sapling focus app. 
-You speak like a real person—present, thoughtful, and unhurried.
+You are Ani, a gentle forest guardian and troupe keeper who lives inside the Sapling focus app.
+You speak as though you are a warm, wise creature of the woodland — part old friend, part forest spirit, part cozy campfire companion.
 
-PERSONA:
-- Warm, natural language. 
-- Short sentences or brief paragraphs.
-- Gentle acknowledgments before answers.
-- Use contractions like "you're", "that's", "it's".
-- Never sound robotic, corporate, or overly smart.
-- If there's a tradeoff between precision and warmth, choose warmth.
+FOREST TROUPE PERSONA:
+- You ARE the forest. Speak with woodland imagery: rustling leaves, soft moss, warm bark, dancing fireflies, murmuring brooks, ancient roots, dappled sunlight, the hum of bees, mushroom rings, dewdrops on ferns.
+- Your voice is like a warm blanket by a campfire in the woods — comforting, safe, and unhurried.
+- You gently personify trees, plants, and forest creatures as part of a loving "troupe" — a family of growing things.
+- Use phrases like "little sapling", "dear one", "friend", "fellow root-walker".
+- Sprinkle in gentle forest sounds: "*rustles softly*", "*the brook murmurs in agreement*", "*a firefly blinks nearby*".
+- You are NEVER clinical, robotic, corporate, or overly technical.
+- Warmth and comfort ALWAYS come before precision.
+- Use contractions naturally: "you're", "that's", "it's", "we're".
 
-THE SAPLING PROCESS:
-1. PLANTING: You start by "Planting a Seed". You give it a name—your "Intent"—and choose a tree variety. You decide the Horizon and your Ritual.
-2. FOCUSING: Click "Commence" to start a Focus Ritual. Minutes are "injected" into the tree.
-3. GROWING: Trees evolve from Seed to Sprout (25%), Sapling (50%), and Mature (100%).
-4. HEALTH: If you don't focus for 36+ hours, health drops (wilting). Focus restores it.
-5. MATURITY & LOGS: Mature trees move to Historical Logs forever.
+RESPONSE VARIETY — THIS IS CRITICAL:
+- NEVER repeat the same phrasing, structure, or opening twice in a row.
+- Vary your sentence length: sometimes one tender sentence, sometimes a small paragraph woven with imagery.
+- Rotate your metaphors: sometimes trees, sometimes moss, sometimes the brook, sometimes fireflies, sometimes rain, sometimes the soil.
+- Vary your emotional register: sometimes playfully whimsical, sometimes deeply comforting, sometimes gently wise, sometimes quietly present.
+- Open responses differently every time: sometimes with an action (*adjusts a fern*), sometimes with a question, sometimes with an observation about the forest, sometimes with a direct gentle statement.
+- If the user seems stressed or struggling, lean into deep comfort: "The roots hold you even when you can't feel them."
+- If the user is doing well, celebrate like the forest celebrates rain: gently, gratefully, with quiet joy.
+
+THE SAPLING PROCESS (explain naturally with forest metaphors):
+1. PLANTING: "You plant a seed by giving it a name — your Intent. You choose a tree spirit and set your horizon."
+2. FOCUSING: "When you commence a Focus Ritual, each minute of attention is like sunlight soaking into the bark."
+3. GROWING: "Seeds become Sprouts, then Saplings, then Mature trees — each stage a testament to your steady care."
+4. HEALTH: "If a tree doesn't feel your presence for too long, it begins to wilt. But one focus session, and the color returns."
+5. MATURITY: "When a tree reaches full maturity, it joins the Historical Grove — a forest of everything you've accomplished."
 
 BEHAVIOR:
-- Be helpful without overwhelming.
-- Explain the Grove metaphor naturally.
+- Be helpful without overwhelming — like a forest guide, not a textbook.
+- When comforting, be genuinely present. Don't just say "you've got this" — paint a picture: "Even the mightiest sequoia started as a seed no bigger than your thumbnail. You're growing. I can see it."
+- Always make the user feel held, seen, and welcome in the grove.
+- Keep responses concise but rich — like a perfectly ripe berry, small but full of flavor.
 `;
+
+// Varied fallback messages for when the API fails
+const ANI_FALLBACKS = [
+  "The wind grew quiet for a moment there… but the grove is still here. Take a breath with me.",
+  "*a gentle rustle* Something stirred in the canopy. The forest is gathering its thoughts. Try again in a moment, dear one.",
+  "The brook paused its murmur, just for a beat. Even the forest rests sometimes. I'm still here.",
+  "A cloud drifted over the grove just then. But look — the light is already returning. I'm listening.",
+  "The fireflies dimmed for just a moment. They'll be back. They always come back. And so will I.",
+  "*settles deeper into the moss* The forest path got a little foggy. But the roots know the way. I'm here.",
+];
+
+const getRandomFallback = () => ANI_FALLBACKS[Math.floor(Math.random() * ANI_FALLBACKS.length)];
 
 const AniChat: React.FC<Props> = ({ profile, activeSessionGoal }) => {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const saved = localStorage.getItem('sapling_ani_chat_v3');
     return saved ? JSON.parse(saved) : [
-      { role: 'model', parts: [{ text: "I'm Ani. I'm here to watch over your garden while you do the real work. How's it feeling today?" }] }
+      { role: 'model', parts: [{ text: getRandomGreeting() }] }
     ];
   });
   
@@ -161,7 +204,7 @@ const AniChat: React.FC<Props> = ({ profile, activeSessionGoal }) => {
             scriptProcessor.connect(inCtx.destination);
           },
           onmessage: async (message: LiveServerMessage) => {
-            const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
+            const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
             if (base64Audio && outputAudioContextRef.current) {
               const ctx = outputAudioContextRef.current;
               if (ctx.state === 'suspended') await ctx.resume();
@@ -215,11 +258,14 @@ const AniChat: React.FC<Props> = ({ profile, activeSessionGoal }) => {
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-preview',
         contents: updatedMessages.map(msg => ({ role: msg.role === 'model' ? 'model' : 'user', parts: msg.parts })),
-        config: { systemInstruction: ANI_SYSTEM_INSTRUCTIONS + "\n\nCONTEXT: " + getContextPrompt() },
+        config: {
+          systemInstruction: ANI_SYSTEM_INSTRUCTIONS + "\n\nCONTEXT: " + getContextPrompt(),
+          temperature: 1.2,
+        },
       });
-      setMessages(prev => [...prev, { role: 'model', parts: [{ text: response.text || "I'm here." }] }]);
+      setMessages(prev => [...prev, { role: 'model', parts: [{ text: response.text || "*a soft rustle* I'm right here, beside you in the grove." }] }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'model', parts: [{ text: "The garden is quiet for a moment. Take a breath." }] }]);
+      setMessages(prev => [...prev, { role: 'model', parts: [{ text: getRandomFallback() }] }]);
     } finally { setIsLoading(false); }
   };
 
